@@ -1,53 +1,35 @@
-# ...existing code...
 #!/bin/bash
-# Ping sweep the Lab
 
-base="onyxnode"
-count=30
-logfile="ping.log"
-perform=0
 
-usage() {
-cat <<EOF
-Usage: $(basename "$0") [-h] [-p][-n count] [-l logfile]
-
-Options:
-  -h        Show this help and exit
-  -p        Perform the ping sweep (default: dry-run; without -p the script only prints actions)
-  -n count  Number of hosts to ping (default: $count)
-  -l file   Log file (default: $logfile)
-EOF
+# Prints usage information
+function usage() {
+	echo "Usage: $0"
+	exit 1
 }
 
-while getopts "hpb:n:l:" opt; do
-  case $opt in
-    h) usage; exit 0 ;;
-    p) perform=1 ;;
-    n) count="$OPTARG" ;;
-    l) logfile="$OPTARG" ;;
-    *) usage; exit 1 ;;
-  esac
-done
+# Pingsweep command for the Onyx nodes
+function pingsweep_cmd() {
+	local base="onyxnode"
+	echo "Pinging nodes... TBD"
+}
 
-# validate count
-if ! [[ "$count" =~ ^[0-9]+$ ]] || [ "$count" -le 0 ]; then
-  echo "Invalid count: $count" >&2
-  exit 1
-fi
+function main() {
+	while getopts ":hp" opt; do
+		case ${opt} in
+		h) usage ;;
+		p) pingsweep_cmd ;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			usage
+			;;
+		esac
+	done
+	shift $((OPTIND -1))
+}
 
-if [ "$perform" -eq 1 ]; then
-  : > "$logfile"
-  echo "Performing ping sweep: base=$base count=$count -> logging to $logfile"
+##  Script entry point
+if [ $# -eq 0 ]; then
+	usage
 else
-  echo "Dry-run (no pings). Use -p to perform the sweep."
+	main "$@"
 fi
-
-for q in $(seq 1 "$count"); do
-  curr="${base}${q}"
-  if [ "$perform" -eq 1 ]; then
-    ping -c 1 "$curr" >> "$logfile" 2>&1
-  else
-    echo "DRY-RUN: ping -c 1 $curr"
-  fi
-done
-# ...existing code...
